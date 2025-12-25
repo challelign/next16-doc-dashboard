@@ -62,6 +62,9 @@ export async function fetchCardData() {
          SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
          FROM invoices`;
 
+  //  A common way to avoid waterfalls is to initiate all data requests at the same time - in parallel.
+  // functions to initiate all promises at the same time. 
+  // Promise.all() is a function that takes an array of promises and returns a promise that resolves when all of the promises in the array have resolved.
     const data = await Promise.all([
       invoiceCountPromise,
       customerCountPromise,
