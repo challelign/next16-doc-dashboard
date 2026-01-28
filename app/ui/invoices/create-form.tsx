@@ -16,6 +16,11 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
   const initialState: State = {
     message: null,
     errors: {},
+    values: {
+      customerId: "",
+      amount: "",
+      status: "",
+    },
   };
 
   const [state, formAction] = useActionState(createInvoice, initialState);
@@ -31,6 +36,7 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
           </label>
           <div className="relative">
             <select
+              key={state.values?.customerId || "customer-key"}
               id="customer"
               name="customerId"
               className="peer block py-2 pl-10 border border-gray-200 rounded-md outline-2 w-full placeholder:text-gray-500 text-sm cursor-pointer"
@@ -66,6 +72,7 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
           <div className="relative mt-2 rounded-md">
             <div className="relative">
               <input
+                key={state.values?.amount || "amount-key"}
                 id="amount"
                 name="amount"
                 type="number"
@@ -93,7 +100,10 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
             Set the invoice status
           </legend>
           <div className="bg-white px-[14px] py-3 border border-gray-200 rounded-md">
-            <div className="flex gap-4">
+            <div
+              className="flex gap-4"
+              key={state.values?.status || "status-key"}
+            >
               <div className="flex items-center">
                 <input
                   id="pending"
