@@ -4,7 +4,9 @@ import { z } from "zod";
 import postgres from "postgres";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-
+import { signIn } from '@/auth';
+import { AuthError } from 'next-auth';
+import bcrypt from 'bcrypt';
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
 const InvoiceFormSchema = z.object({
@@ -118,4 +120,99 @@ export async function updateInvoice(id: string, prevState: State, formData: Form
 export async function deleteInvoice(id: string) {
   await sql`DELETE FROM invoices WHERE id = ${id}`;
   revalidatePath("/dashboard/invoices");
+}
+
+
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  try {
+    await signIn('credentials', formData);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid credentials.';
+        default:
+          return 'Something went wrong.';
+      }
+    }
+    throw error;
+  }
+}
+
+// Registration action
+const RegisterFormSchema = z.object({
+  name: z.string().min(1, { message: 'Please enter your name.' }),
+  email: z.string().email({ message: 'Please enter a valid email.' }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
+  confirmPassword: z.string().min(6, { message: 'Please confirm your password.' }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match.",
+  path: ["confirmPassword"],
+});
+
+export async function register(
+  prevState: any,
+  formData: FormData,
+) {
+  const validatedFields = RegisterFormSchema.safeParse({
+    name: formData.get("name"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+
+  // If form validation fails, return errors early
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing or invalid fields. Failed to register.',
+      values: {
+        name: formData.get("name")?.toString(),
+        email: formData.get("email")?.toString(),
+      },
+    };
+  }
+
+  const { name, email, password } = validatedFields.data;
+
+  try {
+    // Check if user already exists
+    const existingUser = await sql`SELECT * FROM users WHERE email=${email}`;
+    if (existingUser.length > 0) {
+      return {
+        message: 'An account with this email already exists.',
+        values: {
+          name,
+          email,
+        },
+      };
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // Generate unique ID
+    const userId = crypto.randomUUID();
+
+    // Insert new user
+    await sql`
+      INSERT INTO users (id, name, email, password)
+      VALUES (${userId}, ${name}, ${email}, ${hashedPassword})
+    `;
+  } catch (error) {
+    console.error('Failed to register user:', error);
+    return {
+      message: 'Database Error: Failed to register user.',
+      values: {
+        name,
+        email,
+      },
+    };
+  }
+
+  // Redirect to login page after successful registration
+  redirect('/login');
 }
