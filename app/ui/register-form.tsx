@@ -17,8 +17,8 @@ export default function RegisterForm() {
   const [state, formAction, isPending] = useActionState(register, undefined);
 
   return (
-    <form action={formAction} className="space-y-3">
-      <div className="flex-1 bg-gray-50 px-6 pt-8 pb-4 rounded-lg">
+    <form action={formAction} className="pb-3">
+      <div className="flex-1 bg-gray-50 px-6 rounded-lg">
         <h1 className={`${lusitana.className} mb-3 text-2xl`}>
           Create an account
         </h1>
@@ -26,7 +26,7 @@ export default function RegisterForm() {
           {/* Name field */}
           <div>
             <label
-              className="block mt-5 mb-3 font-medium text-gray-900 text-xs"
+              className="block mt-2 mb-1 font-medium text-gray-900 text-xs"
               htmlFor="name"
             >
               Name
@@ -44,7 +44,7 @@ export default function RegisterForm() {
               <UserIcon className="top-1/2 left-3 absolute w-[18px] h-[18px] text-gray-500 peer-focus:text-gray-900 -translate-y-1/2 pointer-events-none" />
             </div>
             {state?.errors?.name && (
-              <div className="mt-2">
+              <div className="">
                 {state.errors.name.map((error: string) => (
                   <p className="text-red-500 text-sm" key={error}>
                     {error}
@@ -57,7 +57,7 @@ export default function RegisterForm() {
           {/* Email field */}
           <div>
             <label
-              className="block mt-5 mb-3 font-medium text-gray-900 text-xs"
+              className="block mt-2 mb-1 font-medium text-gray-900 text-xs"
               htmlFor="email"
             >
               Email
@@ -75,7 +75,7 @@ export default function RegisterForm() {
               <AtSymbolIcon className="top-1/2 left-3 absolute w-[18px] h-[18px] text-gray-500 peer-focus:text-gray-900 -translate-y-1/2 pointer-events-none" />
             </div>
             {state?.errors?.email && (
-              <div className="mt-2">
+              <div className="">
                 {state.errors.email.map((error: string) => (
                   <p className="text-red-500 text-sm" key={error}>
                     {error}
@@ -165,7 +165,7 @@ export default function RegisterForm() {
           )}
         </div>
 
-        <div className="mt-4 text-center">
+        <div className="pt-0 text-center">
           <p className="text-gray-600 text-sm">
             Already have an account?{" "}
             <Link href="/login" className="text-blue-500 hover:underline">
