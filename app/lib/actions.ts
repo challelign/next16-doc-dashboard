@@ -29,7 +29,7 @@ export type State = {
     amount?: string[];
     status?: string[];
   };
-  message?: string | null;
+  message: string;
   values?: {
     customerId?: string;
     amount?: string;
